@@ -6,7 +6,7 @@ import osmnx as ox
 import networkx as nx
 import folium
 
-ox.settings.use_cache = False
+ox.settings.use_cache = True
 print("Step 1: Downloading the street network for Leeds City Centre...")
 # This downloads real data from OpenStreetMap (only drivable roads)
 leeds_centre = (53.8008, -1.5491)
