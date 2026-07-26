@@ -1,7 +1,3 @@
-import warnings
-# Silence that LibreSSL warning so your terminal stays completely clean
-warnings.filterwarnings("ignore", category=UserWarning, module="urllib3")
-
 import osmnx as ox
 import networkx as nx
 import folium
