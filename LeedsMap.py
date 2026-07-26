@@ -45,21 +45,23 @@ best_dist_coords = []
 #Find the hospitals paths using Dijkstra's 
 
 for name, coords in hospitals.items():
-    #Nearest Node to Hospital
+    # Nearest Node to Hospital
     hospital_node = ox.nearest_nodes(graph, X=coords[1], Y=coords[0])
 
     try:
         # --- 1. OPTIMISE FOR TIME (Seconds) ---
         time_route = nx.shortest_path(graph, source=hospital_node, target=end_node, weight="travel_time")
-        time_gdf = ox.routing.route_to_gdf(graph, time_route)
-        time_dist_m = time_gdf["length"].sum()
-        time_sec = time_gdf["travel_time"].sum()
+        
+        # Calculate weights directly along the path
+        time_sec = nx.path_weight(graph, time_route, weight="travel_time")
+        time_dist_m = nx.path_weight(graph, time_route, weight="length")
         
         # --- 2. OPTIMISE FOR DISTANCE (Meters) ---
         dist_route = nx.shortest_path(graph, source=hospital_node, target=end_node, weight="length")
-        dist_gdf = ox.routing.route_to_gdf(graph, dist_route)
-        dist_m = dist_gdf["length"].sum()
-        dist_sec = dist_gdf["travel_time"].sum()
+        
+        # Calculate weights directly along the path
+        dist_m = nx.path_weight(graph, dist_route, weight="length")
+        dist_sec = nx.path_weight(graph, dist_route, weight="travel_time")
 
         print(f"\n {name}:")
         print(f"     Time-Optimized:   {time_dist_m:.0f}m | Est. Arrival: {time_sec/60.0:.2f} mins")
