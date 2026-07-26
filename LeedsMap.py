@@ -9,6 +9,10 @@ print("Step 1: Downloading the street network for Leeds City Centre...")
 # This downloads real data from OpenStreetMap (only drivable roads)
 leeds_centre = (53.8008, -1.5491)
 graph = ox.graph_from_point(leeds_centre, dist=3000, network_type="drive")
+#Added speeds in km/h and travel time on roads
+graph = ox.add_edge_speeds(graph)
+graph = ox.add_edge_travel_times(graph)
+
 print(f"Map Loaded! Found {len(graph.nodes)} intersections and {len(graph.edges)} roads.")
 
 print("Step 2: Defining emergency locations...")
@@ -30,9 +34,13 @@ folium.Marker(location=end_coords, icon=folium.Icon(color='red', icon='ambulance
 
 print("Step 3: Calculating routes for all available ambulances...")
 
-best_hospital = None
-shortest_distance = float('inf')
-best_route_coords = []
+best_time_hospital = None
+fastest_time_sec = float('inf')
+best_time_coords = []
+
+best_dist_hospital = None
+shortest_dist_m = float('inf')
+best_dist_coords = []
 
 #Find the hospitals paths using Dijkstra's 
 
@@ -40,26 +48,65 @@ for name, coords in hospitals.items():
     #Nearest Node to Hospital
     hospital_node = ox.nearest_nodes(graph, X=coords[1], Y=coords[0])
 
-    #Calculate route distance
     try:
-        route = nx.shortest_path(graph, source = hospital_node, target = end_node)
-        #route distance
-        route_length = sum(ox.routing.route_to_gdf(graph, route)["length"])
-        print(f'{name}: Route is {round(route_length,2)} metres long.')
-        #Exact coordinates for drawing lines
-        route_coords = [(graph.nodes[node]['y'], graph.nodes[node]['x']) for node in route]
-        #Check against shortest length
-        if route_length < shortest_distance:
-            shortest_distance = route_length
-            best_hospital = name
-            best_route_coords = route_coords
-        folium.PolyLine(route_coords, color='gray', weight=3, opacity = 0.6, tooltip=f'Route from {name}').add_to(visual_map)
-        folium.Marker(location = coords, popup = name, icon=folium.Icon(color='blue', icon='h-square', prefix='fa')).add_to(visual_map)
-    except nx.NetworkXNoPath:
-        print(f'Could not find a drivable route from {name}')
-    
-folium.PolyLine(best_route_coords, color = 'green', weight = 6, opacity = 1, tooltip='Dispatched Route').add_to(visual_map)
+        # --- 1. OPTIMISE FOR TIME (Seconds) ---
+        time_route = nx.shortest_path(graph, source=hospital_node, target=end_node, weight="travel_time")
+        time_gdf = ox.routing.route_to_gdf(graph, time_route)
+        time_dist_m = time_gdf["length"].sum()
+        time_sec = time_gdf["travel_time"].sum()
+        
+        # --- 2. OPTIMISE FOR DISTANCE (Meters) ---
+        dist_route = nx.shortest_path(graph, source=hospital_node, target=end_node, weight="length")
+        dist_gdf = ox.routing.route_to_gdf(graph, dist_route)
+        dist_m = dist_gdf["length"].sum()
+        dist_sec = dist_gdf["travel_time"].sum()
 
+        print(f"\n {name}:")
+        print(f"     Time-Optimized:   {time_dist_m:.0f}m | Est. Arrival: {time_sec/60.0:.2f} mins")
+        print(f"    Distance-Optimized: {dist_m:.0f}m | Est. Arrival: {dist_sec/60.0:.2f} mins")
+
+        # Track overall fastest time winner
+        if time_sec < fastest_time_sec:
+            fastest_time_sec = time_sec
+            best_time_hospital = name
+            best_time_coords = [(graph.nodes[n]['y'], graph.nodes[n]['x']) for n in time_route]
+
+        # Track overall shortest distance winner
+        if dist_m < shortest_dist_m:
+            shortest_dist_m = dist_m
+            best_dist_hospital = name
+            best_dist_coords = [(graph.nodes[n]['y'], graph.nodes[n]['x']) for n in dist_route]
+
+        # Add hospital marker to map
+        folium.Marker(
+            location=coords, 
+            popup=name, 
+            icon=folium.Icon(color='blue', icon='h-square', prefix='fa')
+        ).add_to(visual_map)
+
+    except nx.NetworkXNoPath:
+        print(f"    Could not find a drivable route from {name}")
+
+# --- DRAW WINNING PATHS ---
+
+# 1. Winning DISTANCE-optimised route (Dashed Blue Line)
+if best_dist_coords:
+    folium.PolyLine(
+        best_dist_coords, color='blue', weight=10, opacity=0.8, dash_array='8, 8',
+        tooltip=f"Shortest Distance Winner: {best_dist_hospital} ({shortest_dist_m:.0f} meters)"
+    ).add_to(visual_map)
+
+# 2. Winning TIME-optimised route (Solid Green Line)
+if best_time_coords:
+    folium.PolyLine(
+        best_time_coords, color='green', weight=4, opacity=0.9,
+        tooltip=f"Fastest Time Winner: {best_time_hospital} ({fastest_time_sec/60.0:.2f} mins)"
+    ).add_to(visual_map)
+
+print("\n" + "="*50)
+print(f" FASTEST DISPATCH:  {best_time_hospital} ({fastest_time_sec/60.0:.2f} minutes)")
+print(f" SHORTEST DISPATCH: {best_dist_hospital} ({shortest_dist_m:.0f} meters)")
+print("="*50)
 output_filename = "ambulance_route.html"
 visual_map.save(output_filename)
 URLpath = os.path.abspath(output_filename)
