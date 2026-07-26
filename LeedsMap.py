@@ -11,7 +11,7 @@ leeds_centre = (53.8008, -1.5491)
 graph = ox.graph_from_point(leeds_centre, dist=3000, network_type="drive")
 print(f"Map Loaded! Found {len(graph.nodes)} intersections and {len(graph.edges)} roads.")
 
-print("\n Step 2: Defining emergency locations...")
+print("Step 2: Defining emergency locations...")
 # Let's set up two random coordinates in Leeds (Latitude, Longitude)
 #Possible starting hospitals and coordinates
 hospitals = {'Leeds General Infirmary': (53.8016, -1.5516),
@@ -28,7 +28,7 @@ visual_map = folium.Map(location = leeds_centre, zoom_start =14)
 #Emergency marker
 folium.Marker(location=end_coords, icon=folium.Icon(color='red', icon='ambulance', prefix='ra')).add_to(visual_map)
 
-print("\n Step 3: Calculating routes for all available ambulances...")
+print("Step 3: Calculating routes for all available ambulances...")
 
 best_hospital = None
 shortest_distance = float('inf')
