@@ -20,7 +20,7 @@ print("Step 2: Defining emergency locations...")
 #Possible starting hospitals and coordinates
 hospitals = {'Leeds General Infirmary': (53.8016, -1.5516),
              'St James\'s University Hospital': (53.8066, -1.5204),
-             'Beckett Street Station': (53.8115, -1.5265)}
+             'St James\'s (Becket St Entrance)': (53.8115, -1.5265)}
 # Start Point (e.g., An Ambulance Station near the University)
 # End Point (e.g., An emergency call location near Leeds Minster)
 end_coords = (53.7961, -1.5362)
