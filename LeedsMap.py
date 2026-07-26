@@ -115,7 +115,7 @@ legend_html = '''
              border:2px solid gray; z-index:9999; font-size:13px; background-color:white;
              padding: 10px; border-radius: 5px;">
  <b>Dispatch Route Legend</b><br>
- <i style="background: green; width: 25px; height: 4px; display: inline-block; margin-right: 8px;"></i><b>Fastest Route (Time)</b><br>
+ <i style="background: green; width: 25px; height: 4px; display: inline-block; margin-right: 8px;"></i><b>Minimum Time Route (Free-Flow)</b><br>
  <i style="background: blue; width: 25px; height: 0px; border-top: 3px dashed blue; display: inline-block; margin-right: 8px;"></i><b>Shortest Route (Distance)</b>
  </div>
  '''
