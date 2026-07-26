@@ -1,6 +1,8 @@
 import osmnx as ox
 import networkx as nx
 import folium
+import webbrowser
+import os
 
 ox.settings.use_cache = True
 print("Step 1: Downloading the street network for Leeds City Centre...")
@@ -60,5 +62,7 @@ folium.PolyLine(best_route_coords, color = 'green', weight = 6, opacity = 1, too
 
 output_filename = "ambulance_route.html"
 visual_map.save(output_filename)
+URLpath = os.path.abspath(output_filename)
+webbrowser.open('file://' + URLpath)
 print(f"Success! Open '{output_filename}' to see the winning route highlighted in green.")
 
