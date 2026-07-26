@@ -107,6 +107,17 @@ print("\n" + "="*50)
 print(f" FASTEST DISPATCH:  {best_time_hospital} ({fastest_time_sec/60.0:.2f} minutes)")
 print(f" SHORTEST DISPATCH: {best_dist_hospital} ({shortest_dist_m:.0f} meters)")
 print("="*50)
+
+legend_html = '''
+ <div style="position: fixed; bottom: 30px; left: 30px; width: 260px; height: 95px; 
+             border:2px solid gray; z-index:9999; font-size:13px; background-color:white;
+             padding: 10px; border-radius: 5px;">
+ <b>Dispatch Route Legend</b><br>
+ <i style="background: green; width: 25px; height: 4px; display: inline-block; margin-right: 8px;"></i><b>Fastest Route (Time)</b><br>
+ <i style="background: blue; width: 25px; height: 0px; border-top: 3px dashed blue; display: inline-block; margin-right: 8px;"></i><b>Shortest Route (Distance)</b>
+ </div>
+ '''
+visual_map.get_root().html.add_child(folium.Element(legend_html))
 output_filename = "ambulance_route.html"
 visual_map.save(output_filename)
 URLpath = os.path.abspath(output_filename)
