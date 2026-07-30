@@ -1,6 +1,9 @@
-# engine.py
 import networkx as nx
 import osmnx as ox
+import pandas as pd
+import os 
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def load_graph(centre_coords=(53.8008, -1.5491), distance=3500):
     ox.settings.use_cache = True
@@ -39,3 +42,38 @@ def calculate_dispatch_options(graph, hospitals, emergency_coords):
             results[name] = None
 
     return results
+def export_summary_csv(dispatch_data, filename='hospital_dispatch_summary.csv'):
+    rows = []
+    for name, data in dispatch_data.items():
+        if data is None:
+            continue
+        rows.append({
+            'Hospital': name,
+            "Fastest_Dist_m": round(data["time_dist_m"]),
+            "Fastest_Time_min": round(data["time_sec"] / 60.0, 2),
+            "Shortest_Dist_m": round(data["dist_m"]),
+            "Shortest_Time_min": round(data["dist_sec"] / 60.0, 2)
+        })
+    df = pd.DataFrame(rows)
+
+    filepath = os.path.join(BASE_DIR, filename)
+    df.to_csv(filepath, index=False)
+    return filepath
+
+def export_winning_route_nodes_csv(winning_coords, hospital_name, filename="winning_route_nodes.csv"):
+    
+    rows = [
+        {
+            "step_index": idx + 1,
+            "hospital_name": hospital_name,
+            "latitude": lat,
+            "longitude": lng
+        }
+        for idx, (lat, lng) in enumerate(winning_coords)
+    ]
+    
+    df = pd.DataFrame(rows)
+    filepath = os.path.join(BASE_DIR, filename)
+    df.to_csv(filepath, index=False)
+    return filepath
+
