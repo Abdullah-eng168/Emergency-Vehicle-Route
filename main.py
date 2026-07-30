@@ -1,7 +1,7 @@
 import os
 import webbrowser
 import folium
-from engine import load_graph, calculate_dispatch_options
+from engine import load_graph, calculate_dispatch_options, export_summary_csv, export_winning_route_nodes_csv
 
 def run_app():
     leeds_centre = (53.8008, -1.5491)
@@ -76,6 +76,13 @@ def run_app():
     output_filename = "ambulance_route.html"
     visual_map.save(output_filename)
     
+    summary_file = export_summary_csv(dispatch_data)
+    print(f"\n Exported dispatch summary to: '{summary_file}'")
+
+    if best_time_coords:
+        route_file = export_winning_route_nodes_csv(best_time_coords, best_time_hospital)
+        print(f" Exported winning route waypoints to: '{route_file}'")
+
     file_url = f"file://{os.path.abspath(output_filename)}"
     print(f"\nSuccess! Map saved to '{output_filename}'. Opening in browser...")
     webbrowser.open(file_url)
