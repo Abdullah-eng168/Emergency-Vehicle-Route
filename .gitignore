@@ -220,3 +220,5 @@ __marimo__/
 cache/
 .cache/
 *.html
+
+.DS_Store
